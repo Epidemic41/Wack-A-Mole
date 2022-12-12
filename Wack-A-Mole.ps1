@@ -1,11 +1,14 @@
-﻿Write-Host "Wack-a-Mole" -ForegroundColor Green
+Write-Host "Wack-a-Mole" -ForegroundColor Green
 Write-Host "2022-2023 ASU CCDC Team"
 Write-Host "Author: Epi AKA David Lee"
 Write-Host "Periodically checks service status and enables services that are disabled"
 Write-Host "This tactic that is meant to buy time while defenders can identify how the attackers gained access and persitence to the machine and remove the attacker."
 
 #configure execution policy so script runs bypass
-#& '.\Start Menu'
+#fix
+#
+
+#insert aski art here
 
 #list of services to monitor, Last item is entering manual name
 Write-Host "Select a service to monitor"
@@ -49,42 +52,73 @@ if ($optionNumber -eq 8){
 }
 if ($optionNumber -eq 9){
     #This last option promps user for custom service not listed above
-    $serviceName = Read-Host "Enter Service Name, confirm after setup that script is running correctly"
+    $serviceName = Read-Host "Enter Service Name (not display name), confirm after setup that script is running correctly"
 }
 
-$wack = "true"
+#formatting
+Write-host "---------------------------------------------------------------------------------------------------------"
 
 #while true loop
+$wack = "true"
 while ($wack -eq "true"){
-    Start-Sleep -Seconds 3
-    Write-Host "wack"
 
     #check if service is up, 
-    if ((Get-Service $serviceName | Select Status) -eq “Running”){
-        #print time $serviceName name, starttype, status
-        #Get-Service $serviceName | Select-Object -Property Name, StartType, Status;
-        Write-Host "Why are you running"
+    if ((Get-Service $serviceName).Status -eq "Running"){
+
+        #display artifacts
+        Write-Host $serviceName" is Running"
+        (Get-Date).ToString('G')
+        Get-Service $serviceName | Format-Table serviceName, displayName, startType, status
+
+
     }
 
     #if service is Not enabled
-    if ((Get-Service $serviceName | Select Status) -ne "Running"){
-    write-host "not running"
+    if ((Get-Service $serviceName).Status -ne "Running"){
+
+        #display artifacts
+        write-host $serviceName" is not running. Attempting to start service."
+        (Get-Date).ToString('G')
+        Get-Service $serviceName | Format-Table serviceName, displayName, startType, status
+
+        #try to start service
+        Start-Service -Name $serviceName
+
+        #if service is now enabled
+        if ((Get-Service $serviceName).Status -eq "Enabled"){
+
+            #display artifacts
+            write-host $serviceName" is now running."
+            (Get-Date).ToString('G')
+            Get-Service $serviceName | Format-Table serviceName, displayName, startType, status
+        }
+        
+        #if service is still not running after the above attempt to get it running
+        if ((Get-Service $serviceName).Status -ne "Running"){
+
+            #display artifacts
+            write-host "Unable to start "$serviceName". Investigate before the mole wacks you."
+            (Get-Date).ToString('G')
+
+            Get-Service $serviceName | Format-Table serviceName, displayName, startType, status
+
+            #stops while loop so Incident responder can investigate
+            $wack = "false"
+
+            #wacked ascii art here
+        }
     }
-        #print time, $serviceName is $serviceName.status
-        #set-service to enabled
 
-        #if service is enabled
-            #print time, $serviceName is now enable
-        #if service is not enabled
+    #sleep 30 seconds
+    Write-host "---------------------------------------------------------------------------------------------------------"
+    Start-Sleep -Seconds 30
 
-            # stop loop, print time, $serviceName is not enabled. Investigate before you get wacked.
-            #$wack = "false"
-    
-    #sleep 20 seconds
-    #Start-Sleep -Seconds 15
-    #Write-host "---------------"
-    #user can pause loop to look at output
-    #write output to log
+
+    #potental new features
+        #execution bypass
+        #write output to log
+        #user can pause loop to look at output
+            #check for input, timeout
 
 } # end of while loop
 
