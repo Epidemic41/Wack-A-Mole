@@ -4,11 +4,10 @@ Write-Host "Author: Epi AKA David Lee"
 Write-Host "Periodically checks service status and enables services that are disabled"
 Write-Host "This tactic that is meant to buy time while defenders can identify how the attackers gained access and persitence to the machine and remove the attacker."
 
-#configure execution policy so script runs bypass
-#fix
-#
 
-#insert aski art here
+#configure execution policy so script runs
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force
+
 
 #list of services to monitor, Last item is entering manual name
 Write-Host "Select a service to monitor"
@@ -122,4 +121,5 @@ while ($wack -eq "true"){
 
 } # end of while loop
 
+#reference
 #https://social.technet.microsoft.com/Forums/windowsserver/en-US/79bf9de7-1c17-45c0-a02b-7558af89807a/powershell-script-to-check-service-status
