@@ -114,7 +114,6 @@ while ($wack -eq "true"){
 
 
     #potental new features
-        #execution bypass
         #write output to log
         #user can pause loop to look at output
             #check for input, timeout
