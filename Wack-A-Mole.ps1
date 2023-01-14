@@ -1,8 +1,8 @@
 Write-Host "Wack-a-Mole" -ForegroundColor Green
 Write-Host "2022-2023 ASU CCDC Team"
 Write-Host "Author: Epi AKA David Lee"
-Write-Host "Periodically checks service status and enables services that are disabled"
-Write-Host "This tactic that is meant to buy time while defenders can identify how the attackers gained access and persitence to the machine and remove the attacker."
+Write-Host "Periodically checks service status and enables services that are disabled, if the service cannot be enabled the script stops the responder is alerted"
+Write-Host "This tactic that is meant top the bleeding while defenders can identify root cause and eradicate the threat actor."
 
 
 #configure execution policy so script runs
