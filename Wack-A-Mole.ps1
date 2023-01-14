@@ -89,8 +89,8 @@ while ($wack -eq "true") {
             #try to start service
             Start-Service -Name $serviceName
 
-            #if service is now enabled
-            if ((Get-Service $serviceName).Status -eq "Enabled") {
+            #if service is now starting or running
+            if ((Get-Service $serviceName).Status -Match "Running|StartPending") { 
 
                 #display artifacts
                 write-host $serviceName" is now running."
