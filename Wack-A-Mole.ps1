@@ -18,38 +18,38 @@ class ServiceListEntry {
 $servicesList = [ServiceListEntry[]]@(
     [ServiceListEntry]@{
         DisplayName = "FTP"
-        Services = @("FTP")
+        Services    = @("FTP")
     },
     [ServiceListEntry]@{
         DisplayName = "HTTP"
-        Services = @("HTTP")
+        Services    = @("HTTP")
     },
     [ServiceListEntry]@{
         DisplayName = "HTTPS"
-        Services = @("HTTPS")
+        Services    = @("HTTPS")
     },
     [ServiceListEntry]@{
         DisplayName = "SMB"
-        Services = @("SMB")
+        Services    = @("SMB")
     },
     [ServiceListEntry]@{
         DisplayName = "DNS"
-        Services = @("DNS")
+        Services    = @("DNS")
     },
     [ServiceListEntry]@{
         DisplayName = "VNC"
-        Services = @("VNC")
+        Services    = @("VNC")
     },
     [ServiceListEntry]@{
         DisplayName = "telnet"
-        Services = @("Telnet")
+        Services    = @("Telnet")
     }
 )
 
 #list of services to monitor, Last item is entering manual name
 Write-Host "Select which services to monitor (separated by commas)"
 
-$servicesList | ForEach-Object {$index=1} { Write-Host "#$($index)" $_.DisplayName; $index++ }  #Print display name of all registered services 
+$servicesList | ForEach-Object { $index = 1 } { Write-Host "#$($index)" $_.DisplayName; $index++ }  #Print display name of all registered services 
 
 Write-Host "#$($servicesList.Length + 1) Custom" #Custom option
 
@@ -59,7 +59,7 @@ $optionNumbers = read-host "Select a number from above list: "
 foreach ($option in $optionNumbers.Split(",")) {
     $option = $option.trim() #Remove whitespace left over from Split()
 
-    if($option -le $servicesList.Length) {
+    if ($option -le $servicesList.Length) {
 
         #Get all services listed under the display name
         $servicesList[[int]$option - 1].Services | ForEach-Object {
@@ -67,7 +67,7 @@ foreach ($option in $optionNumbers.Split(",")) {
             #Assigns the service under the display name to the watched services list if it exists on the system 
             # (eg. When selecting the 'FTP' option, fillezilla-server will be added to the list but FTPSrv won't since IIS isn't installed); ignores if service doesn't exist
             $serviceExists = Get-Service -Name $_ -ErrorAction SilentlyContinue
-            if($null -ne $serviceExists){
+            if ($null -ne $serviceExists) {
                 $monitoredServiceList.Add($_) #Add previously existing service name to monitoring list
             }
         }
