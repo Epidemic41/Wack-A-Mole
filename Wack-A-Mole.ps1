@@ -11,24 +11,24 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force
 $monitoredServiceList = [System.Collections.ArrayList]::new()
 
 class ServiceListEntry {
-    [ValidateNotNullOrEmpty()][string]$DisplayName      #Eg. 'FTP' for FTP related services
-    [ValidateNotNullOrEmpty()][string[]]$Services       #Eg. 'filezilla-server'
+    [ValidateNotNullOrEmpty()][string]$DisplayName      #eg. 'FTP' for FTP related services
+    [ValidateNotNullOrEmpty()][string[]]$Services       #eg. 'filezilla-server'
 }
 
 $servicesList = [ServiceListEntry[]]@(
     [ServiceListEntry]@{
         DisplayName = "FTP"
         Services    = @(
-            "FTPSVC",               #IIS FTP Server
-            "filezilla-server"      #Filezilla FTP Server
+            "FTPSVC",           #IIS FTP Server
+            "filezilla-server"  #Filezilla FTP Server
         )
     },
     [ServiceListEntry]@{
         DisplayName = "HTTP/HTTPS"
         Services    = @(
-            "HTTP",                 #The HTTP 'service' is actually a driver needed for the Print Spooler, see https://superuser.com/questions/1059068/no-http-service-windows-10
+            "HTTP",             #the HTTP 'service' is actually a driver needed for the Print Spooler, see https://superuser.com/questions/1059068/no-http-service-windows-10
             
-            #IIS Services (https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/jj635851(v=ws.11), https://docs.oracle.com/en/industries/health-sciences/inform/cognos1117-install/index.html?toc.htm?226411.htm)
+            #IIS Services
             "W3SVC",
             "W3LOGSVC",
             "WAS"
@@ -63,27 +63,27 @@ Write-Host "#$($servicesList.Length + 1) Custom" #Custom option
 $optionNumbers = read-host "Select a number from above list: "
 
 foreach ($option in $optionNumbers.Split(",")) {
-    $option = $option.trim() #Remove whitespace left over from Split()
+    $option = $option.trim() #remove whitespace left over from Split()
 
     if ($option -le $servicesList.Length) {
 
         #true if any of the group of services under the display name exist on the system 
         $displayNameHasExistentServices = $false;
 
-        #Get all services listed under the display name
+        #get all services listed under the display name
         $servicesList[[int]$option - 1].Services | ForEach-Object {
 
-            #Assigns the service under the display name to the watched services list if it exists on the system 
-            # (eg. When selecting the 'FTP' option, fillezilla-server will be added to the list but FTPSrv won't since IIS isn't installed); ignores if service doesn't exist
+            #assigns the service under the display name to the watched services list if it exists on the system 
+            # (eg. When selecting the 'FTP' option, fillezilla-server will be added to the list but FTPSrv won't if the IIS FTP Server feature isn't installed); ignores silently if service doesn't exist
             $serviceExists = Get-Service -Name $_ -ErrorAction SilentlyContinue
             if ($null -ne $serviceExists) {
-                $monitoredServiceList.Add($_) #Add previously existing service name to monitoring list
+                $monitoredServiceList.Add($_) #add previously existing service name to monitoring list
 
                 $displayNameHasExistentServices = $true
             }
         }
 
-        #Warn the user when attempting to add a set of services that don't exist
+        #warn the user when attempting to add a set of services that don't exist
         if ($displayNameHasExistentServices -eq $false) {
             $serviceListEntry = $servicesList[[int]$option - 1]
             $displayName = $serviceListEntry.DisplayName
@@ -95,7 +95,7 @@ foreach ($option in $optionNumbers.Split(",")) {
     else {
         #This last option promps user for custom service not listed above
         $serviceName = Read-Host "Enter Service Name (not display name), confirm after setup that script is running correctly"
-        $monitoredServiceList.Add($serviceName) #Add custom service name to monitoring list
+        $monitoredServiceList.Add($serviceName) #add custom service name to monitoring list
     }
     
 }
@@ -169,3 +169,6 @@ while ($wack -eq "true") {
 
 #reference
 #https://social.technet.microsoft.com/Forums/windowsserver/en-US/79bf9de7-1c17-45c0-a02b-7558af89807a/powershell-script-to-check-service-status
+#IIS Services 
+# https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/jj635851(v=ws.11), 
+# https://docs.oracle.com/en/industries/health-sciences/inform/cognos1117-install/index.html?toc.htm?226411.htm)
