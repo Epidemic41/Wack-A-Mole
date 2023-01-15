@@ -25,7 +25,14 @@ $servicesList = [ServiceListEntry[]]@(
     },
     [ServiceListEntry]@{
         DisplayName = "HTTP/HTTPS"
-        Services    = @("HTTP", "HTTPS")
+        Services    = @(
+            "HTTP",                 #The HTTP 'service' is actually a driver needed for the Print Spooler, see https://superuser.com/questions/1059068/no-http-service-windows-10
+            
+            #IIS Services (https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/jj635851(v=ws.11), https://docs.oracle.com/en/industries/health-sciences/inform/cognos1117-install/index.html?toc.htm?226411.htm)
+            "W3SVC",
+            "W3LOGSVC",
+            "WAS"
+        )
     },
     [ServiceListEntry]@{
         DisplayName = "SMB"
