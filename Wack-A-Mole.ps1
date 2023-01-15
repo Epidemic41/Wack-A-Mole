@@ -18,7 +18,10 @@ class ServiceListEntry {
 $servicesList = [ServiceListEntry[]]@(
     [ServiceListEntry]@{
         DisplayName = "FTP"
-        Services    = @("FTP")
+        Services    = @(
+            "FTPSVC",               #IIS FTP Server
+            "filezilla-server"      #Filezilla FTP Server
+        )
     },
     [ServiceListEntry]@{
         DisplayName = "HTTP"
@@ -78,7 +81,7 @@ foreach ($option in $optionNumbers.Split(",")) {
         }
 
         #Warn the user when attempting to add a set of services that don't exist
-        if($displayNameHasExistentServices -eq $false) {
+        if ($displayNameHasExistentServices -eq $false) {
             $serviceListEntry = $servicesList[[int]$option - 1]
             $displayName = $serviceListEntry.DisplayName
 
