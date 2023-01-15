@@ -24,12 +24,8 @@ $servicesList = [ServiceListEntry[]]@(
         )
     },
     [ServiceListEntry]@{
-        DisplayName = "HTTP"
-        Services    = @("HTTP")
-    },
-    [ServiceListEntry]@{
-        DisplayName = "HTTPS"
-        Services    = @("HTTPS")
+        DisplayName = "HTTP/HTTPS"
+        Services    = @("HTTP", "HTTPS")
     },
     [ServiceListEntry]@{
         DisplayName = "SMB"
