@@ -10,17 +10,48 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force
 
 $monitoredServiceList = [System.Collections.ArrayList]::new()
 
+class ServiceListEntry {
+    [ValidateNotNullOrEmpty()][string]$DisplayName      #Eg. 'FTP' for FTP related services
+    [ValidateNotNullOrEmpty()][string[]]$Services       #Eg. 'filezilla-server'
+}
+
+$servicesList = [ServiceListEntry[]]@(
+    [ServiceListEntry]@{
+        DisplayName = "FTP"
+        Services = @("FTP")
+    },
+    [ServiceListEntry]@{
+        DisplayName = "HTTP"
+        Services = @("HTTP")
+    },
+    [ServiceListEntry]@{
+        DisplayName = "HTTPS"
+        Services = @("HTTPS")
+    },
+    [ServiceListEntry]@{
+        DisplayName = "SMB"
+        Services = @("SMB")
+    },
+    [ServiceListEntry]@{
+        DisplayName = "DNS"
+        Services = @("DNS")
+    },
+    [ServiceListEntry]@{
+        DisplayName = "VNC"
+        Services = @("VNC")
+    },
+    [ServiceListEntry]@{
+        DisplayName = "telnet"
+        Services = @("Telnet")
+    }
+)
+
 #list of services to monitor, Last item is entering manual name
 Write-Host "Select which services to monitor (separated by commas)"
-Write-Host "#1 FTP"
-Write-Host "#2 HTTP"
-Write-Host "#3 HTTPS"
-Write-Host "#4 SMB"
-Write-Host "#5 DNS"
-Write-Host "#6 VNC"
-Write-Host "#7 SSH"
-Write-Host "#8 telnet"
-Write-Host "#9 Custom"
+
+$servicesList | ForEach-Object {$index=1} { Write-Host "#$($index)" $_.DisplayName; $index++ }  #Print display name of all registered services 
+
+Write-Host "#$($servicesList.Length + 1) Custom" #Custom option
 
 #prompt user for number
 $optionNumbers = read-host "Select a number from above list: "
@@ -28,32 +59,20 @@ $optionNumbers = read-host "Select a number from above list: "
 foreach ($option in $optionNumbers.Split(",")) {
     $option = $option.trim() #Remove whitespace left over from Split()
 
-    #Nine if statements to determine the $serviceName Value based on user input
-    if ($option -eq 1) {
-        $serviceName = "FTP"
+    if($option -le $servicesList.Length) {
+
+        #Get all services listed under the display name
+        $servicesList[[int]$option - 1].Services | ForEach-Object {
+
+            #Assigns the service under the display name to the watched services list if it exists on the system 
+            # (eg. When selecting the 'FTP' option, fillezilla-server will be added to the list but FTPSrv won't since IIS isn't installed); ignores if service doesn't exist
+            $serviceExists = Get-Service -Name $_ -ErrorAction SilentlyContinue
+            if($null -ne $serviceExists){
+                $serviceName = $_
+            }
+        }
     }
-    if ($option -eq 2) {
-        $serviceName = "HTTP"
-    }
-    if ($option -eq 3) {
-        $serviceName = "HTTPS"
-    }
-    if ($option -eq 4) {
-        $serviceName = "SMB"
-    }
-    if ($option -eq 5) {
-        $serviceName = "DNS"
-    }
-    if ($option -eq 6) {
-        $serviceName = "VNC"
-    }
-    if ($option -eq 7) {
-        $serviceName = "SSH"
-    }
-    if ($option -eq 8) {
-        $serviceName = "Telnet"
-    }
-    if ($option -eq 9) {
+    else {
         #This last option promps user for custom service not listed above
         $serviceName = Read-Host "Enter Service Name (not display name), confirm after setup that script is running correctly"
     }
