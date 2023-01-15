@@ -61,6 +61,9 @@ foreach ($option in $optionNumbers.Split(",")) {
 
     if ($option -le $servicesList.Length) {
 
+        #true if any of the group of services under the display name exist on the system 
+        $displayNameHasExistentServices = $false;
+
         #Get all services listed under the display name
         $servicesList[[int]$option - 1].Services | ForEach-Object {
 
@@ -69,7 +72,18 @@ foreach ($option in $optionNumbers.Split(",")) {
             $serviceExists = Get-Service -Name $_ -ErrorAction SilentlyContinue
             if ($null -ne $serviceExists) {
                 $monitoredServiceList.Add($_) #Add previously existing service name to monitoring list
+
+                $displayNameHasExistentServices = $true
             }
+        }
+
+        #Warn the user when attempting to add a set of services that don't exist
+        if($displayNameHasExistentServices -eq $false) {
+            $serviceListEntry = $servicesList[[int]$option - 1]
+            $displayName = $serviceListEntry.DisplayName
+
+            Write-Warning "No services under group '$displayName' are present on this system! ($($serviceListEntry.Services -join ", "))"
+            Write-Warning "Check selection(s) from above are entered correctly."
         }
     }
     else {
