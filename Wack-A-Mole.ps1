@@ -68,15 +68,16 @@ foreach ($option in $optionNumbers.Split(",")) {
             # (eg. When selecting the 'FTP' option, fillezilla-server will be added to the list but FTPSrv won't since IIS isn't installed); ignores if service doesn't exist
             $serviceExists = Get-Service -Name $_ -ErrorAction SilentlyContinue
             if($null -ne $serviceExists){
-                $serviceName = $_
+                $monitoredServiceList.Add($_) #Add previously existing service name to monitoring list
             }
         }
     }
     else {
         #This last option promps user for custom service not listed above
         $serviceName = Read-Host "Enter Service Name (not display name), confirm after setup that script is running correctly"
+        $monitoredServiceList.Add($serviceName) #Add custom service name to monitoring list
     }
-    $monitoredServiceList.Add($serviceName) #Add service name to monitoring list
+    
 }
 #formatting
 Write-host "---------------------------------------------------------------------------------------------------------"
