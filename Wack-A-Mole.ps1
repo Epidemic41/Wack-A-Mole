@@ -16,16 +16,6 @@ class ServiceListEntry {
 }
 
 $servicesList = [ServiceListEntry[]]@(
-[ServiceListEntry]@{
-        Displayname = "Core Services"
-        Services    = @(
-            "wuauserv", #Windows Update
-            "WinDefend",    #Defender (NOTE: If another security provider is registered and installed this service WILL BE UNABLE TO START since the primary security provider takes over AV/EDR functionality )
-                            # WUZAH DOES NOT DO THIS - THIS SERVICE SHOULD START
-                            
-            "mpssvc"        #Windows Defender Firewall
-        )
-    },
     [ServiceListEntry]@{
         DisplayName = "FTP"
         Services    = @(
@@ -75,8 +65,18 @@ $servicesList = [ServiceListEntry[]]@(
             "gpsvc"     #Group policy client
         )
     }
-    
 )
+
+$coreServices = [ServiceListEntry]@{
+    Displayname = "Core Services"
+    Services    = @(
+        "wuauserv", #Windows Update
+        "WinDefend",    #Defender (NOTE: If another security provider is registered and installed this service WILL BE UNABLE TO START since the primary security provider takes over AV/EDR functionality )
+                        # WUZAH DOES NOT DO THIS - THIS SERVICE SHOULD START
+                        
+        "mpssvc"        #Windows Defender Firewall
+    )
+}
 
 #list of services to monitor, Last item is entering manual name
 Write-Host "Select which services to monitor (separated by commas)"
@@ -150,7 +150,7 @@ foreach ($option in $optionNumbers.Split(",")) {
 
 #Core services
 if ($skipCoreServicesRegistration -eq $false) {
-    $servicesList[0].Services  | ForEach-Object {
+    $coreServices.Services  | ForEach-Object {
     Write-Host $_
         $serviceExists = Get-Service -Name $_ -ErrorAction SilentlyContinue
         if ($null -ne $serviceExists) {
