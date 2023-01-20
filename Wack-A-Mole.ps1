@@ -54,15 +54,15 @@ $servicesList = [ServiceListEntry[]]@(
         DisplayName = "Active Directory Domain Services"
         Services    = @(
             "DFSR", #DFS Replication
-            "Dfs"       #DFS Namespace
+            "Dfs",       #DFS Namespace
             "IsmServ",
             "kdc",
             "netlogon"
             "w32time",
-            "NTDS"      #Domain services
-            "DNS"       #DNS server
-            "Dnscache"  #DNS Client
-            "gpsvc"     #Group policy client
+            "NTDS",      #Domain services
+            "DNS",       #DNS server
+            "Dnscache",  #DNS Client
+            "gpsvc",     #Group policy client
         )
     }
 )
