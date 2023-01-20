@@ -71,8 +71,8 @@ $coreServices = [ServiceListEntry]@{
     Displayname = "Core Services"
     Services    = @(
         "wuauserv", #Windows Update
-        "WinDefend",    #Defender (NOTE: If another security provider is registered and installed this service WILL BE UNABLE TO START since the primary security provider takes over AV/EDR functionality )
-                        # WUZAH DOES NOT DO THIS - THIS SERVICE SHOULD START
+        "WinDefend", #Defender (NOTE: If another security provider is registered and installed this service WILL BE UNABLE TO START since the primary security provider takes over AV/EDR functionality )
+        # WUZAH DOES NOT DO THIS - THIS SERVICE SHOULD START
                         
         "mpssvc"        #Windows Defender Firewall
     )
@@ -80,7 +80,7 @@ $coreServices = [ServiceListEntry]@{
 
 #list of services to monitor, Last item is entering manual name
 Write-Host "Select which services to monitor (separated by commas)"
-Write-Host "Core Services will be included by unless e(X)cluded"
+Write-Host "Core Services will be included unless e(X)cluded"
 
 $servicesList | ForEach-Object { $index = 1 } { Write-Host "#$($index)" $_.DisplayName; $index++ }  #Print display name of all registered services 
 
@@ -90,68 +90,67 @@ Write-Host "#$($servicesList.Length + 1) Custom" #Custom option
 $optionNumbers = read-host "Select a number from above list: "
 
 $skipCoreServicesRegistration = $false
+if ($optionNumbers -ne '') {
+    foreach ($option in $optionNumbers.Split(",")) {
+        $option = $option.trim() #remove whitespace left over from Split()
 
-foreach ($option in $optionNumbers.Split(",")) {
-    $option = $option.trim() #remove whitespace left over from Split()
-
-    if ($option -match "x|X") {
-        $skipCoreServicesRegistration = $true
-        Continue #skip this iteration of the foreach loop to prevent a custom service from being registered
-    }
-
-
-    if ($option -le $servicesList.Length) {
-
-        #true if any of the group of services under the display name exist on the system 
-        $displayNameHasExistentServices = $false;
-
-        #get all services listed under the display name
-        $servicesList[[int]$option - 1].Services | ForEach-Object {
-
-            #assigns the service under the display name to the watched services list if it exists on the system 
-            # (eg. When selecting the 'FTP' option, fillezilla-server will be added to the list but FTPSrv won't if the IIS FTP Server feature isn't installed); ignores silently if service doesn't exist
-            $serviceExists = Get-Service -Name $_ -ErrorAction SilentlyContinue
-            if ($null -ne $serviceExists) {
-                $monitoredServiceList.Add($_) #add previously existing service name to monitoring list
-
-                $displayNameHasExistentServices = $true
-            }
+        if ($option -match "x|X") {
+            $skipCoreServicesRegistration = $true
+            Continue #skip this iteration of the foreach loop to prevent a custom service from being registered
         }
 
-        #warn the user when attempting to add a set of services that don't exist
-        if ($displayNameHasExistentServices -eq $false) {
-            $serviceListEntry = $servicesList[[int]$option - 1]
-            $displayName = $serviceListEntry.DisplayName
+        if ($option -le $servicesList.Length) {
 
-            Write-Warning "No services under group '$displayName' are present on this system! ($($serviceListEntry.Services -join ", "))"
-            Write-Warning "Check selection(s) from above are entered correctly."
-        }
-    }
-    else {
-        #loop until a valid service name is inputted
-        while ($true) {
-            #This last option promps user for custom service not listed above
-            $serviceName = Read-Host "Enter Service Name (not display name), confirm after setup that script is running correctly"
+            #true if any of the group of services under the display name exist on the system 
+            $displayNameHasExistentServices = $false;
 
-            $serviceExists = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
-            Write-host $serviceExists
-            if ($null -eq $serviceExists) {
-                Write-Warning "No custom service '$serviceName' is present on this system! Check for a typo!"
+            #get all services listed under the display name
+            $servicesList[[int]$option - 1].Services | ForEach-Object {
+
+                #assigns the service under the display name to the watched services list if it exists on the system 
+                # (eg. When selecting the 'FTP' option, fillezilla-server will be added to the list but FTPSrv won't if the IIS FTP Server feature isn't installed); ignores silently if service doesn't exist
+                $serviceExists = Get-Service -Name $_ -ErrorAction SilentlyContinue
+                if ($null -ne $serviceExists) {
+                    $monitoredServiceList.Add($_) #add previously existing service name to monitoring list
+
+                    $displayNameHasExistentServices = $true
+                }
             }
-            else {
-                $monitoredServiceList.Add($serviceName) #add custom service name to monitoring list
-                Write-Host "Custom service '$serviceName' successfully added!"
-                Break
+
+            #warn the user when attempting to add a set of services that don't exist
+            if ($displayNameHasExistentServices -eq $false) {
+                $serviceListEntry = $servicesList[[int]$option - 1]
+                $displayName = $serviceListEntry.DisplayName
+
+                Write-Warning "No services under group '$displayName' are present on this system! ($($serviceListEntry.Services -join ", "))"
+                Write-Warning "Check selection(s) from above are entered correctly."
             }
         }
+        else {
+            #loop until a valid service name is inputted
+            while ($true) {
+                #This last option promps user for custom service not listed above
+                $serviceName = Read-Host "Enter Service Name (not display name), confirm after setup that script is running correctly"
+
+                $serviceExists = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+                Write-host $serviceExists
+                if ($null -eq $serviceExists) {
+                    Write-Warning "No custom service '$serviceName' is present on this system! Check for a typo!"
+                }
+                else {
+                    $monitoredServiceList.Add($serviceName) #add custom service name to monitoring list
+                    Write-Host "Custom service '$serviceName' successfully added!"
+                    Break
+                }
+            }
         
+        }
     }
 }
 
 #Core services
 if ($skipCoreServicesRegistration -eq $false) {
     $coreServices.Services  | ForEach-Object {
-    Write-Host $_
         $serviceExists = Get-Service -Name $_ -ErrorAction SilentlyContinue
         if ($null -ne $serviceExists) {
             $monitoredServiceList.Add($_) #add previously existing service name to monitoring list
